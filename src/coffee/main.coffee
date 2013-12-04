@@ -60,7 +60,11 @@ toggle = (block) ->
     Main.queenImageUsed[block.image] = false
     block.status = 0
     Main.count--
-    removeElem(Main.queens, [block.x, block.y])
+    console.log "hogehoge"
+    queen = {x: block.x, y: block.y}
+    console.log Main.queens
+    removeElem(Main.queens, queen)
+    console.log "fugafuga"
   else if Main.count < 5
     imageNum = pickQueenImageNumber()
     $(block).addClass('active')
@@ -68,10 +72,13 @@ toggle = (block) ->
     block.status = 1
     block.image = imageNum
     Main.count++
+
     queen = {x: block.x, y: block.y}
     Main.queens.push(queen)
+    console.log "hoge"
   if Main.guideEnabled
     refreshGuide()
+  console.log "fuga"
   updateCountLabel()
   updateJudgeButtonState()
 
@@ -104,6 +111,7 @@ is_affected = (x, y, queen) ->
   return (horizon or vertical or diagonal)
 
 updateCountLabel = ->
+  console.log "call updateCountLabel!!! " + Main.count
   $('#countlabel').html('×' + Main.count + '/5')
 
 updateTimeLabel = ->
@@ -216,7 +224,7 @@ pickQueenImageNumber = ->
 removeElem = (array, value) ->
   removeIndexes = []
   for elem, i in array
-    if elem.isEqualToArray(value)
+    if elem.x == value.x and elem.y == value.y
       removeIndexes.push(i)
   for val, i in removeIndexes
     array = array.splice(val-i, 1)

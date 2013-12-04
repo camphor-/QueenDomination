@@ -76,7 +76,14 @@ toggle = function(block) {
     Main.queenImageUsed[block.image] = false;
     block.status = 0;
     Main.count--;
-    removeElem(Main.queens, [block.x, block.y]);
+    console.log("hogehoge");
+    queen = {
+      x: block.x,
+      y: block.y
+    };
+    console.log(Main.queens);
+    removeElem(Main.queens, queen);
+    console.log("fugafuga");
   } else if (Main.count < 5) {
     imageNum = pickQueenImageNumber();
     $(block).addClass('active');
@@ -89,10 +96,12 @@ toggle = function(block) {
       y: block.y
     };
     Main.queens.push(queen);
+    console.log("hoge");
   }
   if (Main.guideEnabled) {
     refreshGuide();
   }
+  console.log("fuga");
   updateCountLabel();
   return updateJudgeButtonState();
 };
@@ -139,6 +148,7 @@ is_affected = function(x, y, queen) {
 };
 
 updateCountLabel = function() {
+  console.log("call updateCountLabel!!! " + Main.count);
   return $('#countlabel').html('×' + Main.count + '/5');
 };
 
@@ -298,7 +308,7 @@ removeElem = function(array, value) {
   removeIndexes = [];
   for (i = _i = 0, _len = array.length; _i < _len; i = ++_i) {
     elem = array[i];
-    if (elem.isEqualToArray(value)) {
+    if (elem.x === value.x && elem.y === value.y) {
       removeIndexes.push(i);
     }
   }
