@@ -3,7 +3,7 @@ QueenDomination
 
 QueenDomination is a kind of pazzle game with chess.
 This is a description of "Domination problems" from
-[Mathematical chess problem](http://en.wikipedia.org/wiki/Mathematical_chess_problem)
+[Mathematical chess problem](http://en.wikipedia.org/wiki/Mathematical_chess_problem#Domination_problems)
 entry on Wikipedia, the free encyclopedia.
 
 > Another kind of mathematical chess problems is a domination problem (or covering).
