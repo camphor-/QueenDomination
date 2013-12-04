@@ -1,4 +1,4 @@
-var Main, arraysEqual, clearGuide, judge, refreshGuide, removeElem, replaceScene, reset, showMessage, showResult, startTimer, switchGuide, toggle, updateCountLabel, updateJudgeButtonState, updateTimeLabel;
+var Main, arraysEqual, clearGuide, is_affected, judge, refreshGuide, removeElem, replaceScene, reset, showMessage, showResult, startTimer, switchGuide, toggle, updateCountLabel, updateJudgeButtonState, updateTimeLabel;
 
 Main = {
   blocks: [[], [], [], [], [], [], [], []],
@@ -67,18 +67,27 @@ replaceScene = function(id) {
 };
 
 toggle = function(block) {
+  var queen;
   if (block.status) {
     $(block).removeClass('active');
     $(block).removeClass('cat' + Main.count);
     block.status = 0;
     Main.count--;
-    removeElem(Main.queens, [block.x, block.y]);
+    queen = {
+      x: block.x,
+      y: block.y
+    };
+    removeElem(Main.queens, queen);
   } else if (Main.count < 8) {
     $(block).addClass('active');
     $(block).addClass('cat' + Main.count);
     block.status = 1;
     Main.count++;
-    Main.queens.push([block.x, block.y]);
+    queen = {
+      x: block.x,
+      y: block.y
+    };
+    Main.queens.push(queen);
   }
   if (Main.guideEnabled) {
     refreshGuide();
@@ -88,7 +97,7 @@ toggle = function(block) {
 };
 
 updateJudgeButtonState = function() {
-  if (Main.count === 8) {
+  if (Main.count === 5) {
     return $('#judgebutton').removeClass('disabled');
   } else {
     return $('#judgebutton').addClass('disabled', 'disabled');
@@ -96,20 +105,19 @@ updateJudgeButtonState = function() {
 };
 
 judge = function() {
-  var i, j, q, queens, _i, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2, _ref3;
-  queens = Main.queens;
-  for (i = _i = 0, _len = queens.length; _i < _len; i = ++_i) {
-    q = queens[i];
-    for (j = _j = _ref = i + 1, _ref1 = queens.length; _ref <= _ref1 ? _j < _ref1 : _j > _ref1; j = _ref <= _ref1 ? ++_j : --_j) {
-      if (q[0] === queens[j][0] || q[1] === queens[j][1]) {
-        return false;
+  var i, is_ok, j, q, _i, _j, _k, _len, _ref;
+  for (i = _i = 0; _i < 8; i = ++_i) {
+    for (j = _j = 0; _j < 8; j = ++_j) {
+      is_ok = false;
+      _ref = Main.queens;
+      for (_k = 0, _len = _ref.length; _k < _len; _k++) {
+        q = _ref[_k];
+        if (is_affected(i, j, q)) {
+          is_ok = true;
+          continue;
+        }
       }
-    }
-  }
-  for (i = _k = 0, _len1 = queens.length; _k < _len1; i = ++_k) {
-    q = queens[i];
-    for (j = _l = _ref2 = i + 1, _ref3 = queens.length; _ref2 <= _ref3 ? _l < _ref3 : _l > _ref3; j = _ref2 <= _ref3 ? ++_l : --_l) {
-      if ((queens[j][1] === -queens[j][0] + q[1] + q[0]) || (queens[j][1] === queens[j][0] + q[1] - q[0])) {
+      if (!is_ok) {
         return false;
       }
     }
@@ -117,8 +125,20 @@ judge = function() {
   return true;
 };
 
+is_affected = function(x, y, queen) {
+  var diagonal, horizon, nx, ny, qx, qy, vertical;
+  nx = x + 1;
+  ny = y + 1;
+  qx = queen.x + 1;
+  qy = queen.y + 1;
+  horizon = qx === nx;
+  vertical = qy === ny;
+  diagonal = (ny + nx === qx + qy) || (nx - ny === qx - qy);
+  return horizon || vertical || diagonal;
+};
+
 updateCountLabel = function() {
-  return $('#countlabel').html('×' + Main.count + '/8');
+  return $('#countlabel').html('×' + Main.count + '/5');
 };
 
 updateTimeLabel = function() {
@@ -153,8 +173,7 @@ reset = function() {
     g.remove();
   }
   Main.guides = [];
-  updateJudgeButtonState();
-  return console.log(Main.queens);
+  return updateJudgeButtonState();
 };
 
 showMessage = function(mes) {
@@ -189,7 +208,7 @@ switchGuide = function() {
 };
 
 refreshGuide = function() {
-  var block, guide, i, mark, q, queens, x, y, _i, _len, _results;
+  var block, guide, i, q, queens, x, y, _i, _len, _results;
   clearGuide();
   queens = Main.queens;
   _results = [];
@@ -199,55 +218,39 @@ refreshGuide = function() {
       var _j, _results1;
       _results1 = [];
       for (x = _j = 0; _j < 8; x = ++_j) {
-        if (x !== q[1]) {
+        if (x !== q.y) {
           guide = $('<div>').addClass('guide');
-          guide.x = q[0];
+          guide.x = q.x;
           guide.y = x;
-          block = $(Main.blocks[q[0]][x]);
+          block = $(Main.blocks[q.x][x]);
           block.append(guide);
-          if (block.hasClass('active')) {
-            mark = $('<div>').addClass('mark');
-            $(guide).append(mark);
-          }
           Main.guides.push(guide);
         }
-        if (x !== q[0]) {
+        if (x !== q.x) {
           guide = $('<div>').addClass('guide');
           guide.x = x;
-          guide.y = q[1];
-          block = $(Main.blocks[x][q[1]]);
+          guide.y = q.y;
+          block = $(Main.blocks[x][q.y]);
           block.append(guide);
-          if (block.hasClass('active')) {
-            mark = $('<div>').addClass('mark');
-            $(guide).append(mark);
-          }
           Main.guides.push(guide);
         }
-        if (x !== q[0]) {
-          y = -x + q[1] + q[0];
+        if (x !== q.x) {
+          y = -x + q.x + q.y;
           if ((0 <= y && y < 8)) {
             guide = $('<div>').addClass('guide');
             guide.x = x;
             guide.y = y;
             block = $(Main.blocks[x][y]);
             block.append(guide);
-            if (block.hasClass('active')) {
-              mark = $('<div>').addClass('mark');
-              $(guide).append(mark);
-            }
             Main.guides.push(guide);
           }
-          y = x + q[1] - q[0];
+          y = x + q.y - q.x;
           if ((0 <= y && y < 8)) {
             guide = $('<div>').addClass('guide');
             guide.x = x;
             guide.y = y;
             block = $(Main.blocks[x][y]);
             block.append(guide);
-            if (block.hasClass('active')) {
-              mark = $('<div>').addClass('mark');
-              $(guide).append(mark);
-            }
             _results1.push(Main.guides.push(guide));
           } else {
             _results1.push(void 0);
@@ -303,7 +306,6 @@ arraysEqual = function(arrayA, arrayB) {
     v = arrayA[i];
     a = arrayA[i];
     b = arrayB[i];
-    console.log(a + ',' + b);
     if ((a instanceof Array) && (b instanceof Array)) {
       if (!arraysEqual(a, b)) {
         return false;

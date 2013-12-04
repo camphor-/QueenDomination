@@ -58,40 +58,50 @@ toggle = (block) ->
     $(block).removeClass('cat'+Main.count)
     block.status = 0
     Main.count--
-    removeElem(Main.queens, [block.x, block.y])
+    queen = {x: block.x, y: block.y}
+    removeElem(Main.queens, queen)
   else if Main.count<8
     $(block).addClass('active')
     $(block).addClass('cat'+Main.count)
     block.status = 1
     Main.count++
-    Main.queens.push([block.x, block.y])
+    queen = {x: block.x, y: block.y}
+    Main.queens.push(queen)
   if Main.guideEnabled
     refreshGuide()
   updateCountLabel()
   updateJudgeButtonState()
 
 updateJudgeButtonState = ->
-  if Main.count==8
+  if Main.count==5
     $('#judgebutton').removeClass('disabled')
   else
     $('#judgebutton').addClass('disabled', 'disabled')
 
 judge = ->
-  queens = Main.queens
-  #縦横
-  for q, i in queens
-    for j in [i+1...queens.length]
-      if q[0]==queens[j][0] or q[1]==queens[j][1]
-        return false
-  #斜め
-  for q, i in queens
-    for j in [i+1...queens.length]
-      if (queens[j][1] == -queens[j][0] + q[1]+q[0]) or (queens[j][1] == queens[j][0] + q[1]-q[0])
+  for i in [0...8]
+    for j in [0...8]
+      is_ok = false
+      for q in Main.queens
+        if is_affected(i, j, q)
+          is_ok = true
+          continue
+      if !is_ok
         return false
   return true
 
+is_affected = (x, y, queen) ->
+  nx = x + 1
+  ny = y + 1
+  qx = queen.x + 1
+  qy = queen.y + 1
+  horizon = (qx == nx)
+  vertical = (qy == ny)
+  diagonal = (ny + nx == qx + qy) || (nx - ny == qx - qy)
+  return (horizon or vertical or diagonal)
+
 updateCountLabel = ->
-  $('#countlabel').html('×' + Main.count + '/8')
+  $('#countlabel').html('×' + Main.count + '/5')
 
 updateTimeLabel = ->
   $('#timelabel').html(Main.time + '秒')
@@ -117,7 +127,6 @@ reset = ->
     g.remove()
   Main.guides = []
   updateJudgeButtonState()
-  console.log Main.queens
 
 showMessage = (mes) ->
   $('.messagelabel').html(mes)
@@ -151,50 +160,38 @@ refreshGuide = ->
   for q, i in queens
     for x in [0...8]
       #縦横
-      if x!=q[1]
+      if x!=q.y
         guide = $('<div>').addClass('guide')
-        guide.x = q[0]
+        guide.x = q.x
         guide.y = x
-        block = $(Main.blocks[q[0]][x])
+        block = $(Main.blocks[q.x][x])
         block.append(guide)
-        if block.hasClass('active')
-          mark = $('<div>').addClass('mark')
-          $(guide).append(mark)
         Main.guides.push(guide)
-      if x!=q[0]
+      if x!=q.x
         guide = $('<div>').addClass('guide')
         guide.x = x
-        guide.y = q[1]
-        block = $(Main.blocks[x][q[1]])
+        guide.y = q.y
+        block = $(Main.blocks[x][q.y])
         block.append(guide)
-        if block.hasClass('active')
-          mark = $('<div>').addClass('mark')
-          $(guide).append(mark)
         Main.guides.push(guide)
       #斜め
-      if x!=q[0]
-        y = -x + q[1]+q[0]
+      if x!=q.x
+        y = -x + q.x+q.y
         if 0<=y<8
           guide = $('<div>').addClass('guide')
           guide.x = x
           guide.y = y
           block = $(Main.blocks[x][y])
           block.append(guide)
-          if block.hasClass('active')
-            mark = $('<div>').addClass('mark')
-            $(guide).append(mark)
           Main.guides.push(guide)
 
-        y = x + q[1]-q[0]
+        y = x + q.y-q.x
         if 0<=y<8
           guide = $('<div>').addClass('guide')
           guide.x = x
           guide.y = y
           block = $(Main.blocks[x][y])
           block.append(guide)
-          if block.hasClass('active')
-            mark = $('<div>').addClass('mark')
-            $(guide).append(mark)
           Main.guides.push(guide)
 
 clearGuide = ->
@@ -221,7 +218,6 @@ arraysEqual = (arrayA, arrayB) ->
   for v, i in arrayA
     a = arrayA[i]
     b = arrayB[i]
-    console.log a+','+b
     if (a instanceof Array) and (b instanceof Array)
       if !arraysEqual(a, b)
         return false
