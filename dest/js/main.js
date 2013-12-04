@@ -1,4 +1,4 @@
-var Main, arraysEqual, clearGuide, is_affected, judge, refreshGuide, removeElem, replaceScene, reset, showMessage, showResult, startTimer, switchGuide, toggle, updateCountLabel, updateJudgeButtonState, updateTimeLabel;
+var Main, arraysEqual, clearGuide, is_affected, judge, pickQueenImageNumber, refreshGuide, removeElem, replaceScene, reset, showMessage, showResult, startTimer, switchGuide, toggle, updateCountLabel, updateJudgeButtonState, updateTimeLabel;
 
 Main = {
   blocks: [[], [], [], [], [], [], [], []],
@@ -8,7 +8,8 @@ Main = {
   count: 0,
   time: 0,
   timer: null,
-  result: false
+  result: false,
+  queenImageUsed: [false, false, false, false, false, false, false, false]
 };
 
 $(function() {
@@ -67,21 +68,21 @@ replaceScene = function(id) {
 };
 
 toggle = function(block) {
-  var queen;
+  var imageNum, queen;
   if (block.status) {
     $(block).removeClass('active');
-    $(block).removeClass('cat' + Main.count);
+    console.log('cat' + block.image);
+    $(block).removeClass('cat' + block.image);
+    Main.queenImageUsed[block.image] = false;
     block.status = 0;
     Main.count--;
-    queen = {
-      x: block.x,
-      y: block.y
-    };
-    removeElem(Main.queens, queen);
+    removeElem(Main.queens, [block.x, block.y]);
   } else if (Main.count < 5) {
+    imageNum = pickQueenImageNumber();
     $(block).addClass('active');
-    $(block).addClass('cat' + Main.count);
+    $(block).addClass('cat' + imageNum);
     block.status = 1;
+    block.image = imageNum;
     Main.count++;
     queen = {
       x: block.x,
@@ -159,11 +160,15 @@ reset = function() {
   Main.count = 0;
   updateCountLabel();
   for (i = _i = 0; _i < 8; i = ++_i) {
+    Main.queenImageUsed[i] = false;
     for (j = _j = 0; _j < 8; j = ++_j) {
       block = Main.blocks[i][j];
       block.status = 0;
       $(block).removeClass('active');
       $(block).removeClass('mark');
+      $(block).removeClass(function(index, css) {
+        return (css.match(/cat\d/g) || []).join(' ');
+      });
     }
   }
   Main.queens = [];
@@ -274,6 +279,18 @@ clearGuide = function() {
     g.remove();
   }
   return Main.guides = [];
+};
+
+pickQueenImageNumber = function() {
+  var b, i, _i, _len, _ref;
+  _ref = Main.queenImageUsed;
+  for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+    b = _ref[i];
+    if (!b) {
+      Main.queenImageUsed[i] = true;
+      return i;
+    }
+  }
 };
 
 removeElem = function(array, value) {
