@@ -60,9 +60,9 @@ toggle = (block) ->
     Main.count--
     queen = {x: block.x, y: block.y}
     removeElem(Main.queens, queen)
-  else if Main.count<8
+  else if Main.count < 5
     $(block).addClass('active')
-    $(block).addClass('cat'+Main.count)
+    $(block).addClass('cat'+ Main.count)
     block.status = 1
     Main.count++
     queen = {x: block.x, y: block.y}

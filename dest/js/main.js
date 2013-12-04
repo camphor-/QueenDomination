@@ -78,7 +78,7 @@ toggle = function(block) {
       y: block.y
     };
     removeElem(Main.queens, queen);
-  } else if (Main.count < 8) {
+  } else if (Main.count < 5) {
     $(block).addClass('active');
     $(block).addClass('cat' + Main.count);
     block.status = 1;
