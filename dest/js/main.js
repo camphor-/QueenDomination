@@ -1,4 +1,4 @@
-var Main, arraysEqual, clearGuide, is_affected, judge, pickQueenImageNumber, refreshGuide, removeElem, replaceScene, reset, showMessage, showResult, startTimer, switchGuide, toggle, updateCountLabel, updateJudgeButtonState, updateTimeLabel;
+var Main, arraysEqual, clearGuide, is_affected, judge, pickQueenImageNumber, playBGM, playClick, playNyah, playSound, refreshGuide, removeElem, replaceScene, reset, showMessage, showResult, startTimer, switchGuide, toggle, updateCountLabel, updateJudgeButtonState, updateTimeLabel;
 
 Main = {
   blocks: [[], [], [], [], [], [], [], []],
@@ -9,11 +9,14 @@ Main = {
   time: 0,
   timer: null,
   result: false,
-  queenImageUsed: [false, false, false, false, false, false, false, false]
+  queenImageUsed: [false, false, false, false, false, false, false, false],
+  nyahSound: null,
+  clickSound: null
 };
 
 $(function() {
   var block, blocks, i, j, _i, _j;
+  playBGM();
   replaceScene('intro');
   blocks = $('.block');
   for (i = _i = 0; _i < 8; i = ++_i) {
@@ -30,17 +33,20 @@ $(function() {
   }
   updateCountLabel();
   $('#startbutton').click(function() {
+    playSound('../sound/start.wav');
     replaceScene('main');
     Main.time = 0;
     startTimer();
     return updateTimeLabel();
   });
   $('#judgebutton').click(function() {
+    playClick();
     if (!$('#judgebutton').hasClass('disabled')) {
       return showResult();
     }
   });
   $('#resetbutton').click(function() {
+    playSound('../sound/reset.wav');
     return reset();
   });
   $('#backbutton').click(function() {
@@ -49,10 +55,12 @@ $(function() {
       Main.guideEnabled = true;
       switchGuide();
       replaceScene('intro');
+      playClick();
     }
     return $('#message').hide();
   });
   return $('#guidebutton').click(function() {
+    playClick();
     return switchGuide();
   });
 });
@@ -91,6 +99,7 @@ toggle = function(block) {
     block.status = 1;
     block.image = imageNum;
     Main.count++;
+    playNyah();
     queen = {
       x: block.x,
       y: block.y
@@ -200,10 +209,10 @@ showResult = function() {
   if (!$(this).hasClass('disabled')) {
     if (judge()) {
       clearInterval(Main.timer);
-      showMessage("正解！<br>✌(’ω’✌ )三✌(’ω’)✌三( ✌’ω’)✌<br><br>タイム: " + (Main.time - 1) + "秒");
+      showMessage("正解！<br>タイム: " + (Main.time - 1) + "秒");
       return Main.result = true;
     } else {
-      showMessage("不正解<br>('ω'乂)");
+      showMessage("不正解<br>");
       return Main.result = false;
     }
   }
@@ -301,6 +310,37 @@ pickQueenImageNumber = function() {
       return i;
     }
   }
+};
+
+playBGM = function() {
+  var bgm;
+  bgm = new Audio('../sound/bgm.wav');
+  bgm.loop = true;
+  return bgm.play();
+};
+
+playNyah = function() {
+  if (!Main.nyahSound) {
+    Main.nyahSound = new Audio('../sound/cat.wav');
+  } else {
+    Main.nyahSound.currentTime = 0;
+  }
+  return Main.nyahSound.play();
+};
+
+playClick = function() {
+  if (!Main.clickSound) {
+    Main.clickSound = new Audio('../sound/click.wav');
+  } else {
+    Main.clickSound.currentTime = 0;
+  }
+  return Main.clickSound.play();
+};
+
+playSound = function(path) {
+  var sound;
+  sound = new Audio(path);
+  return sound.play();
 };
 
 removeElem = function(array, value) {

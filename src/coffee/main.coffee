@@ -8,8 +8,11 @@ Main =
   timer: null
   result: false
   queenImageUsed: [false, false, false, false, false, false, false, false]
+  nyahSound: null
+  clickSound: null
 
 $ ->
+  playBGM()
   replaceScene('intro')
   #ブロック要素を二次元配列に格納
   blocks = $('.block')
@@ -24,15 +27,18 @@ $ ->
       Main.blocks[i].push(block)
   updateCountLabel()
   $('#startbutton').click ->
+    playSound('../sound/start.wav')    
     replaceScene('main')
     Main.time = 0
     startTimer()
     updateTimeLabel()
   $('#judgebutton').click ->
+    playClick()
     if !$('#judgebutton').hasClass('disabled')
       showResult()
 
   $('#resetbutton').click ->
+    playSound('../sound/reset.wav')    
     reset()
 
   $('#backbutton').click ->
@@ -41,12 +47,15 @@ $ ->
       Main.guideEnabled = true
       switchGuide()
       replaceScene('intro')
+      playClick()
     $('#message').hide()
 
   $('#guidebutton').click ->
+    playClick()
     switchGuide()
 
 replaceScene = (id) ->
+
   scenes = ['intro', 'main', 'message']
   for s, i in scenes
     $('#'+s).hide()
@@ -72,6 +81,7 @@ toggle = (block) ->
     block.status = 1
     block.image = imageNum
     Main.count++
+    playNyah()
 
     queen = {x: block.x, y: block.y}
     Main.queens.push(queen)
@@ -150,10 +160,10 @@ showResult = ->
   if !$(this).hasClass('disabled')
     if judge()
       clearInterval(Main.timer)
-      showMessage("正解！<br>✌(’ω’✌ )三✌(’ω’)✌三( ✌’ω’)✌<br><br>タイム: "+(Main.time-1)+"秒")
+      showMessage("正解！<br>タイム: "+(Main.time-1)+"秒")
       Main.result = true
     else
-      showMessage("不正解<br>('ω'乂)")
+      showMessage("不正解<br>")
       Main.result = false
 
 switchGuide = ->
@@ -219,6 +229,29 @@ pickQueenImageNumber = ->
     if !b
       Main.queenImageUsed[i] = true
       return i
+
+playBGM = ->
+  bgm = new Audio('../sound/bgm.wav')
+  bgm.loop = true
+  bgm.play()
+
+playNyah = ->
+  if !Main.nyahSound
+    Main.nyahSound = new Audio('../sound/cat.wav')
+  else
+    Main.nyahSound.currentTime = 0
+  Main.nyahSound.play();
+
+playClick = ->
+  if !Main.clickSound
+    Main.clickSound = new Audio('../sound/click.wav')
+  else
+    Main.clickSound.currentTime = 0
+  Main.clickSound.play();
+
+playSound = (path) ->
+  sound = new Audio(path)
+  sound.play()
 
 #Foundation
 removeElem = (array, value) ->
